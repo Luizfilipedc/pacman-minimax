@@ -1,14 +1,14 @@
 # keyboardAgents.py
 # -----------------
-# Informações de Licenciamento: Você é livre para usar ou estender estes projetos para
-# fins educacionais, desde que (1) não distribua ou publique soluções,
-# (2) mantenha este aviso, e (3) forneça a devida atribuição à UC Berkeley,
-# incluindo um link para http://ai.berkeley.edu.
+# Licensing Information:  You are free to use or extend these projects for
+# educational purposes provided that (1) you do not distribute or publish
+# solutions, (2) you retain this notice, and (3) you provide clear
+# attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
 #
-# Informações sobre Atribuição: Os projetos de IA do Pacman foram desenvolvidos
-# na UC Berkeley. Os projetos principais e autograders foram criados principalmente
-# por John DeNero (denero@cs.berkeley.edu) e Dan Klein (klein@cs.berkeley.edu).
-# A correção automática do lado do aluno foi adicionada por Brad Miller, Nick Hay e
+# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
+# The core projects and autograders were primarily created by John DeNero
+# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
@@ -19,9 +19,9 @@ import random
 
 class KeyboardAgent(Agent):
     """
-    Um agente controlado pelo teclado do usuário.
+    An agent controlled by the keyboard.
     """
-    # NOTA: As teclas de setas também funcionam.
+    # NOTE: Arrow keys also work.
     WEST_KEY = 'a'
     EAST_KEY = 'd'
     NORTH_KEY = 'w'
@@ -29,6 +29,7 @@ class KeyboardAgent(Agent):
     STOP_KEY = 'q'
 
     def __init__(self, index=0):
+
         self.lastMove = Directions.STOP
         self.index = index
         self.keys = []
@@ -36,8 +37,6 @@ class KeyboardAgent(Agent):
     def getAction(self, state):
         from graphicsUtils import keys_waiting
         from graphicsUtils import keys_pressed
-        
-        # Pega as teclas que foram pressionadas pelo jogador
         keys = keys_waiting() + keys_pressed()
         if keys != []:
             self.keys = keys
@@ -45,17 +44,14 @@ class KeyboardAgent(Agent):
         legal = state.getLegalActions(self.index)
         move = self.getMove(legal)
 
-        # Se nenhuma direção foi definida, tenta manter o último movimento
         if move == Directions.STOP:
-            # Tenta se mover na mesma direção de antes
+            # Try to move in the same direction as before
             if self.lastMove in legal:
                 move = self.lastMove
 
-        # Força o 'Stop' (parada) se a tecla de parada for pressionada e for uma ação legal
         if (self.STOP_KEY in self.keys) and Directions.STOP in legal:
             move = Directions.STOP
 
-        # Se o movimento não for permitido pelas paredes, escolhe uma ação aleatória
         if move not in legal:
             move = random.choice(legal)
 
@@ -63,9 +59,6 @@ class KeyboardAgent(Agent):
         return move
 
     def getMove(self, legal):
-        """
-        Retorna a direção baseada nas teclas pressionadas que também seja legal.
-        """
         move = Directions.STOP
         if (self.WEST_KEY in self.keys or 'Left' in self.keys) and Directions.WEST in legal:
             move = Directions.WEST
@@ -80,10 +73,9 @@ class KeyboardAgent(Agent):
 
 class KeyboardAgent2(KeyboardAgent):
     """
-    Um segundo agente controlado pelo teclado, feito para permitir
-    multiplayer no mesmo computador.
+    A second agent controlled by the keyboard.
     """
-    # NOTA: Usar teclas diferentes (I, J, K, L) para o Jogador 2
+    # NOTE: Arrow keys also work.
     WEST_KEY = 'j'
     EAST_KEY = "l"
     NORTH_KEY = 'i'
@@ -91,9 +83,6 @@ class KeyboardAgent2(KeyboardAgent):
     STOP_KEY = 'u'
 
     def getMove(self, legal):
-        """
-        Igual ao do primeiro jogador, mas sem aceitar as setas do teclado (que ficam pro Jogador 1).
-        """
         move = Directions.STOP
         if (self.WEST_KEY in self.keys) and Directions.WEST in legal:
             move = Directions.WEST

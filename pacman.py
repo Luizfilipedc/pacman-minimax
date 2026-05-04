@@ -13,31 +13,31 @@
 
 
 """
-Pacman.py contém a lógica do clássico jogo Pac-Man, junto com o código
-principal para rodar uma partida. Este arquivo está dividido em três seções:
+Pacman.py holds the logic for the classic pacman game along with the main
+code to run a game.  This file is divided into three sections:
 
-  (i)  A sua interface com o mundo do Pac-Man:
-          O Pac-Man é um ambiente complexo. Você provavelmente não vai querer
-          ler todo o código que escrevemos para fazer o jogo funcionar
-          corretamente. Esta seção contém as partes do código
-          que você precisará entender para concluir o
-          projeto. Há também um pouco de código no game.py que você deve
-          entender.
+  (i)  Your interface to the pacman world:
+          Pacman is a complex environment.  You probably don't want to
+          read through all of the code we wrote to make the game runs
+          correctly.  This section contains the parts of the code
+          that you will need to understand in order to complete the
+          project.  There is also some code in game.py that you should
+          understand.
 
-  (ii)  Os segredos ocultos do Pac-Man:
-          Esta seção contém toda a lógica que o ambiente
-          do Pac-Man usa para decidir quem pode se mover para onde, quem morre quando
-          as coisas colidem, etc. Você não deve precisar ler esta seção
-          de código, mas pode, se quiser.
+  (ii)  The hidden secrets of pacman:
+          This section contains all of the logic code that the pacman
+          environment uses to decide who can move where, who dies when
+          things collide, etc.  You shouldn't need to read this section
+          of code, but you can if you want.
 
-  (iii) Framework para iniciar um jogo:
-          A seção final contém o código para ler o comando
-          que você usa para configurar o jogo e, em seguida, iniciar um novo jogo, junto com
-          a vinculação de todas as partes externas (funções de agentes, gráficos).
-          Dê uma olhada nesta seção para ver todas as opções disponíveis para você.
+  (iii) Framework to start a game:
+          The final section contains the code for reading the command
+          you use to set up the game, then starting up a new game, along with
+          linking in all the external parts (agent functions, graphics).
+          Check this section out to see all the options available to you.
 
-Para jogar sua primeira partida, digite 'python3 pacman.py' na linha de comando.
-As teclas são 'a', 's', 'd' e 'w' para se mover (ou as setas do teclado). Divirta-se!
+To play your first game, type 'python pacman.py' from the command line.
+The keys are 'a', 's', 'd', and 'w' to move (or arrow keys).  Have fun!
 """
 from game import GameStateData
 from game import Game
@@ -60,17 +60,17 @@ import os
 
 class GameState:
     """
-    Um GameState especifica o estado completo do jogo, incluindo a comida, cápsulas,
-    configurações dos agentes e mudanças de pontuação.
+    A GameState specifies the full game state, including the food, capsules,
+    agent configurations and score changes.
 
-    Os GameStates são usados pelo objeto Game para capturar o estado real do jogo e
-    podem ser usados pelos agentes para raciocinar sobre o jogo.
+    GameStates are used by the Game object to capture the actual state of the game and
+    can be used by agents to reason about the game.
 
-    Grande parte das informações em um GameState é armazenada em um objeto GameStateData. Nós
-    recomendamos fortemente que você acesse esses dados usando os métodos de acesso abaixo, em vez
-    de se referir diretamente ao objeto GameStateData.
+    Much of the information in a GameState is stored in a GameStateData object.  We
+    strongly suggest that you access that data via the accessor methods below rather
+    than referring to the GameStateData object directly.
 
-    Observe que no Pac-Man clássico, o Pac-Man é sempre o agente 0.
+    Note that in classic Pacman, Pacman is always agent 0.
     """
 
     ####################################################
@@ -276,18 +276,16 @@ TIME_PENALTY = 1  # Number of points lost each round
 
 class ClassicGameRules:
     """
-    Estas regras de jogo gerenciam o fluxo de controle de uma partida, decidindo quando
-    e como o jogo começa e termina.
+    These game rules manage the control flow of a game, deciding when
+    and how the game starts and ends.
     """
 
     def __init__(self, timeout=30):
         self.timeout = timeout
 
     def newGame(self, layout, pacmanAgent, ghostAgents, display, quiet=False, catchExceptions=False):
-        # Configura a lista de agentes começando pelo Pac-Man seguido pelos Fantasmas
         agents = [pacmanAgent] + ghostAgents[:layout.getNumGhosts()]
         initState = GameState()
-        # Inicializa o estado com as posições lidas do mapa (layout)
         initState.initialize(layout, len(ghostAgents))
         game = Game(agents, display, self, catchExceptions=catchExceptions)
         game.state = initState
@@ -297,7 +295,7 @@ class ClassicGameRules:
 
     def process(self, state, game):
         """
-        Verifica a cada turno se o jogo deve ser encerrado por vitória ou derrota.
+        Checks to see whether it is time to end the game.
         """
         if state.isWin():
             self.win(state, game)
@@ -306,12 +304,12 @@ class ClassicGameRules:
 
     def win(self, state, game):
         if not self.quiet:
-            print("O Pac-Man saiu vitorioso! Pontuação: %d" % state.data.score)
+            print("Pacman emerges victorious! Score: %d" % state.data.score)
         game.gameOver = True
 
     def lose(self, state, game):
         if not self.quiet:
-            print("O Pac-Man morreu! Pontuação: %d" % state.data.score)
+            print("Pacman died! Score: %d" % state.data.score)
         game.gameOver = True
 
     def getProgress(self, game):
@@ -341,60 +339,59 @@ class ClassicGameRules:
 
 class PacmanRules:
     """
-    Essas funções governam como o Pac-Man interage com o ambiente sob
-    as regras clássicas do jogo.
+    These functions govern how pacman interacts with his environment under
+    the classic game rules.
     """
     PACMAN_SPEED = 1
 
     def getLegalActions(state):
         """
-        Retorna uma lista de ações possíveis que o Pac-Man pode tomar (ignorando paredes).
+        Returns a list of possible actions.
         """
         return Actions.getPossibleActions(state.getPacmanState().configuration, state.data.layout.walls)
     getLegalActions = staticmethod(getLegalActions)
 
     def applyAction(state, action):
         """
-        Edita o estado do jogo para refletir os resultados da ação tomada pelo Pac-Man.
+        Edits the state to reflect the results of the action.
         """
         legal = PacmanRules.getLegalActions(state)
         if action not in legal:
-            raise Exception("Ação ilegal do Pac-Man: " + str(action))
+            raise Exception("Illegal action " + str(action))
 
         pacmanState = state.data.agentStates[0]
 
-        # Atualiza a configuração (Move a posição X, Y do Pac-Man)
+        # Update Configuration
         vector = Actions.directionToVector(action, PacmanRules.PACMAN_SPEED)
-        pacmanState.configuration = pacmanState.configuration.generateSuccessor(vector)
+        pacmanState.configuration = pacmanState.configuration.generateSuccessor(
+            vector)
 
-        # Consome comida ou pílulas
+        # Eat
         next = pacmanState.configuration.getPosition()
         nearest = nearestPoint(next)
         if manhattanDistance(nearest, next) <= 0.5:
-            # Remove a comida do mapa e aumenta a pontuação
+            # Remove food
             PacmanRules.consume(nearest, state)
     applyAction = staticmethod(applyAction)
 
     def consume(position, state):
         x, y = position
-        # Se comeu uma bolinha normal (food)
+        # Eat food
         if state.data.food[x][y]:
             state.data.scoreChange += 10
             state.data.food = state.data.food.copy()
             state.data.food[x][y] = False
             state.data._foodEaten = position
-            
+            # TODO: cache numFood?
             numFood = state.getNumFood()
-            # Se não houver mais comida e ele não perdeu, então venceu!
             if numFood == 0 and not state.data._lose:
                 state.data.scoreChange += 500
                 state.data._win = True
-                
-        # Se comeu uma pílula grande (capsule)
+        # Eat capsule
         if(position in state.getCapsules()):
             state.data.capsules.remove(position)
             state.data._capsuleEaten = position
-            # Reseta o temporizador de susto de TODOS os fantasmas
+            # Reset all ghosts' scared timers
             for index in range(1, len(state.data.agentStates)):
                 state.data.agentStates[index].scaredTimer = SCARED_TIME
     consume = staticmethod(consume)
@@ -402,50 +399,46 @@ class PacmanRules:
 
 class GhostRules:
     """
-    Essas funções ditam como os fantasmas interagem com o ambiente.
+    These functions dictate how ghosts interact with their environment.
     """
     GHOST_SPEED = 1.0
 
     def getLegalActions(state, ghostIndex):
         """
-        Fantasmas não podem parar (Stop) e não podem dar meia-volta
-        a menos que cheguem a um beco sem saída, mas podem virar 90 graus em cruzamentos.
+        Ghosts cannot stop, and cannot turn around unless they
+        reach a dead end, but can turn 90 degrees at intersections.
         """
         conf = state.getGhostState(ghostIndex).configuration
-        possibleActions = Actions.getPossibleActions(conf, state.data.layout.walls)
+        possibleActions = Actions.getPossibleActions(
+            conf, state.data.layout.walls)
         reverse = Actions.reverseDirection(conf.direction)
-        
-        # Fantasmas nunca param
         if Directions.STOP in possibleActions:
             possibleActions.remove(Directions.STOP)
-            
-        # Fantasmas não podem voltar por onde vieram se tiverem outra opção
         if reverse in possibleActions and len(possibleActions) > 1:
             possibleActions.remove(reverse)
-            
         return possibleActions
     getLegalActions = staticmethod(getLegalActions)
 
     def applyAction(state, action, ghostIndex):
+
         legal = GhostRules.getLegalActions(state, ghostIndex)
         if action not in legal:
-            raise Exception("Ação ilegal do fantasma: " + str(action))
+            raise Exception("Illegal ghost action " + str(action))
 
         ghostState = state.data.agentStates[ghostIndex]
         speed = GhostRules.GHOST_SPEED
-        # Se o fantasma está assustado, ele anda pela metade da velocidade
         if ghostState.scaredTimer > 0:
             speed /= 2.0
-            
         vector = Actions.directionToVector(action, speed)
-        ghostState.configuration = ghostState.configuration.generateSuccessor(vector)
+        ghostState.configuration = ghostState.configuration.generateSuccessor(
+            vector)
     applyAction = staticmethod(applyAction)
 
     def decrementTimer(ghostState):
         timer = ghostState.scaredTimer
         if timer == 1:
-            ghostState.configuration.pos = nearestPoint(ghostState.configuration.pos)
-        # Diminui o tempo de susto a cada turno até chegar a zero
+            ghostState.configuration.pos = nearestPoint(
+                ghostState.configuration.pos)
         ghostState.scaredTimer = max(0, timer - 1)
     decrementTimer = staticmethod(decrementTimer)
 

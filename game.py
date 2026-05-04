@@ -33,10 +33,10 @@ import sys
 
 class Agent:
     """
-    Um Agente (Agent) deve definir um método getAction, mas também pode definir os
-    seguintes métodos que serão chamados se existirem:
+    An agent must define a getAction method, but may also define the
+    following methods which will be called if they exist:
 
-    def registerInitialState(self, state): # inspeciona o estado inicial do jogo
+    def registerInitialState(self, state): # inspects the starting state
     """
 
     def __init__(self, index=0):
@@ -44,8 +44,8 @@ class Agent:
 
     def getAction(self, state):
         """
-        O Agente receberá um GameState (estado do jogo) e deve
-        retornar uma ação em Directions.{North, South, East, West, Stop}
+        The Agent will receive a GameState (from either {pacman, capture, sonar}.py) and
+        must return an action from Directions.{North, South, East, West, Stop}
         """
         raiseNotDefined()
 
@@ -74,11 +74,11 @@ class Directions:
 
 class Configuration:
     """
-    Uma Configuração (Configuration) mantém as coordenadas (x,y) de um personagem, juntamente com sua
-    direção de movimento.
+    A Configuration holds the (x,y) coordinate of a character, along with its
+    traveling direction.
 
-    A convenção para posições, como em um gráfico bidimensional, é que (0,0) é o canto inferior esquerdo,
-    x aumenta horizontalmente e y aumenta verticalmente. Portanto, o norte é a direção de aumento de y, ou (0,1).
+    The convention for positions, like a graph, is that (0,0) is the lower left corner, x increases
+    horizontally and y increases vertically.  Therefore, north is the direction of increasing y, or (0,1).
     """
 
     def __init__(self, pos, direction):
@@ -126,32 +126,25 @@ class Configuration:
 
 class AgentState:
     """
-    Os AgentStates guardam o estado de um agente (sua configuração atual, velocidade,
-    se está assustado, etc). Isso é essencial para saber onde e como um fantasma ou o Pac-Man
-    se encontra em um determinado turno.
+    AgentStates hold the state of an agent (configuration, speed, scared, etc).
     """
 
     def __init__(self, startConfiguration, isPacman):
-        # A configuração inicial (posição e direção) de onde o agente começou
         self.start = startConfiguration
-        # A configuração atual no decorrer do jogo
         self.configuration = startConfiguration
         self.isPacman = isPacman
-        # Tempo restante que o fantasma ficará assustado (0 se não estiver)
         self.scaredTimer = 0
-        # Os estados abaixo são usados apenas em modos competitivos (capture the flag)
+        # state below potentially used for contest only
         self.numCarrying = 0
         self.numReturned = 0
 
     def __str__(self):
-        # Retorna uma string fácil de ler dizendo se é Pacman ou Fantasma e sua posição
         if self.isPacman:
             return "Pacman: " + str(self.configuration)
         else:
-            return "Fantasma: " + str(self.configuration)
+            return "Ghost: " + str(self.configuration)
 
     def __eq__(self, other):
-        # Permite comparar se dois estados de agentes são exatamente iguais
         if other == None:
             return False
         return self.configuration == other.configuration and self.scaredTimer == other.scaredTimer
@@ -160,7 +153,6 @@ class AgentState:
         return hash(hash(self.configuration) + 13 * hash(self.scaredTimer))
 
     def copy(self):
-        # Cria uma cópia independente do estado deste agente (muito usado pelo Minimax ao gerar sucessores)
         state = AgentState(self.start, self.isPacman)
         state.configuration = self.configuration
         state.scaredTimer = self.scaredTimer
@@ -169,48 +161,42 @@ class AgentState:
         return state
 
     def getPosition(self):
-        # Retorna apenas a tupla de posição (x, y) do agente
         if self.configuration == None:
             return None
         return self.configuration.getPosition()
 
     def getDirection(self):
-        # Retorna a direção que o agente está olhando no momento
         return self.configuration.getDirection()
 
 
 class Grid:
     """
-    Um array 2D de objetos suportado por uma lista de listas. Os dados são acessados
-    via grid[x][y] onde (x,y) são as posições no mapa do Pac-Man com o eixo x horizontal,
-    eixo y vertical e a origem (0,0) no canto inferior esquerdo.
+    A 2-dimensional array of objects backed by a list of lists.  Data is accessed
+    via grid[x][y] where (x,y) are positions on a Pacman map with x horizontal,
+    y vertical and the origin (0,0) in the bottom left corner.
 
-    O método __str__ constrói uma saída que é orientada visualmente como o tabuleiro do jogo.
-    Isso é usado para armazenar paredes, comidas e pílulas do cenário de maneira eficiente.
+    The __str__ method constructs an output that is oriented like a pacman board.
     """
 
     def __init__(self, width, height, initialValue=False, bitRepresentation=None):
         if initialValue not in [False, True]:
-            raise Exception('Grids só podem conter valores booleanos (True/False)')
+            raise Exception('Grids can only contain booleans')
         self.CELLS_PER_INT = 30
 
         self.width = width
         self.height = height
-        # Inicializa a matriz 2D com o initialValue (ex: False para espaços vazios)
         self.data = [[initialValue for y in range(
             height)] for x in range(width)]
         if bitRepresentation:
             self._unpackBits(bitRepresentation)
 
     def __getitem__(self, i):
-        # Permite acessar a grid diretamente usando colchetes: grid[x][y]
         return self.data[i]
 
     def __setitem__(self, key, item):
         self.data[key] = item
 
     def __str__(self):
-        # Transforma a matriz em uma string visualizável no terminal
         out = [[str(self.data[x][y])[0] for x in range(self.width)]
                for y in range(self.height)]
         out.reverse()
@@ -561,20 +547,19 @@ except:
 
 class Game:
     """
-    O objeto Game (Jogo) gerencia o fluxo de controle, solicitando ações dos agentes
-    em sequência e chamando a interface gráfica para atualizar a tela.
+    The Game manages the control flow, soliciting actions from agents.
     """
 
     def __init__(self, agents, display, rules, startingIndex=0, muteAgents=False, catchExceptions=False):
-        self.agentCrashed = False  # Flag para saber se algum agente causou erro/exceção
-        self.agents = agents       # Lista de instâncias de Agentes (Pac-Man é o índice 0)
-        self.display = display     # Referência para o motor de gráficos (ex: PacmanGraphics)
-        self.rules = rules         # Objeto com as regras do jogo (ClassicGameRules)
-        self.startingIndex = startingIndex # Qual agente começa jogando
-        self.gameOver = False      # Controle de término do jogo
+        self.agentCrashed = False
+        self.agents = agents
+        self.display = display
+        self.rules = rules
+        self.startingIndex = startingIndex
+        self.gameOver = False
         self.muteAgents = muteAgents
-        self.catchExceptions = catchExceptions # Se True, evita que o programa inteiro quebre caso um agente falhe
-        self.moveHistory = []      # Armazena o histórico de movimentos realizados
+        self.catchExceptions = catchExceptions
+        self.moveHistory = []
         self.totalAgentTimes = [0 for agent in agents]
         self.totalAgentTimeWarnings = [0 for agent in agents]
         self.agentTimeout = False
@@ -618,20 +603,20 @@ class Game:
 
     def run(self):
         """
-        O loop principal (Main Control Loop) para a execução do jogo.
-        É aqui que o jogo de fato acontece, turno a turno.
+        Main control loop for game play.
         """
-        # Inicializa a parte visual baseada no estado atual do jogo
         self.display.initialize(self.state.data)
         self.numMoves = 0
 
-        # Prepara e informa os agentes que o jogo começou (útil para agentes que aprendem)
+        # self.display.initialize(self.state.makeObservation(1).data)
+        # inform learning agents of the game start
         for i in range(len(self.agents)):
             agent = self.agents[i]
             if not agent:
                 self.mute(i)
-                # Este é um agente nulo, o que significa que falhou ao carregar
-                print("Agente %d falhou ao carregar" % i, file=sys.stderr)
+                # this is a null agent, meaning it failed to load
+                # the other team wins
+                print("Agent %d failed to load" % i, file=sys.stderr)
                 self.unmute()
                 self._agentCrash(i, quiet=True)
                 return
